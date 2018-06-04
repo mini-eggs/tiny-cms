@@ -9,5 +9,7 @@ declare module "vue/types/vue" {
 
   interface Vue {
     $request(obj: IRequestParameters): Promise<any>;
+    $alert(msg: string): void;
+    $bus: Vue;
   }
 }

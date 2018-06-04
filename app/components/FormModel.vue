@@ -54,7 +54,7 @@ const initial = {
   title: "",
   rules: [(x: string) => x !== "" || "Invalid"],
   inputs: [inputSeed(), inputSeed(), inputSeed(), inputSeed()],
-  fieldTypes: ["Text Short", "Text Large", "Date", "Content(s)"],
+  fieldTypes: ["Text Short", "Text Large", "Date" /* , "Content(s)" todo */],
   name,
   loading: false
 };
@@ -67,6 +67,13 @@ export default Vue.extend({
       ...initial,
       ...(this.seed || {})
     };
+  },
+
+  mounted() {
+    if (!this.seed) {
+      // bugs - todo
+      this.inputs = [inputSeed(), inputSeed(), inputSeed(), inputSeed()];
+    }
   },
 
   methods: {
@@ -89,16 +96,17 @@ export default Vue.extend({
       const method = this.seed ? "PATCH" : "POST";
 
       const body = {
+        ...(this.seed || {}),
         inputs: this.inputs,
-        title: this.title,
-        ...(this.seed || {})
+        title: this.title
       };
 
       this.loading = true;
       await this.$request({ url, method, body });
-      this.$emit("complete");
       this.loading = false;
+
       Object.assign(this.$data, { ...initial });
+      this.$emit("complete");
     },
 
     removeItem(index: number) {

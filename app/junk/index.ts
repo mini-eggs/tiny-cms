@@ -1,36 +1,21 @@
 export class Content {
-  public static getKey(i: any) {
-    switch (true) {
-      case i.text_short !== null: {
-        return "text_short";
-      }
-      case i.text_large !== null: {
-        return "text_large";
-      }
-      case i.date !== null: {
-        return "date";
-      }
-      default: {
-        throw new Error("Couldn't find key.");
-      }
-    }
-  }
-
-  public static getValue(i: any) {
-    return i.text_short || i.text_large || i.date
-  }
-
   public static format(item: any) {
     const next = { ...item };
+    const first = item.values[0]
+    const title = first.text_short || first.text_large || first.date
+    return { ...next, title };
+  }
+}
 
-    next.values = item.values.reduce(
-      (t: any, i: any) => ({ ...t, [Content.getKey(i)]: Content.getValue(i) }),
-      {}
-    );
-
+export class Model {
+  public static format(item: any) {
     return {
-      ...next,
-      title: next.values[Object.keys(next.values)[0]]
+      id: item.id,
+      title: item.title,
+      inputs: item.fields.map((data: any) => ({
+        title: data.title,
+        type: data.type
+      }))
     };
   }
 }

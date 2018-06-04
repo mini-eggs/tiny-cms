@@ -68,7 +68,9 @@ Models.hasMany(Fields, { as: "fields" });
 Models.hasMany(Content, { as: "content" });
 Content.hasMany(Values, { as: "values" });
 
-Values.sync(opts);
-Content.sync(opts);
-Fields.sync(opts);
+Content.belongsTo(Models, { as: "model" });
+
 Models.sync(opts);
+Fields.sync(opts);
+Content.sync(opts);
+Values.sync(opts);

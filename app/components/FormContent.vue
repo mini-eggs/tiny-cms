@@ -2,7 +2,7 @@
   <center>
     <main>
       <v-form ref="form">
-        <v-layout row wrap>
+        <v-layout row wrap v-if="!seed">
           <v-flex xs12>
             <v-select v-model="model" :rules="rules" :items="modelTypes" label="Model" required></v-select>
           </v-flex>
@@ -43,6 +43,25 @@ main {
 
 <script lang="ts">
 import Vue from "vue";
+import Day from "dayjs";
+import { CANT_CREATE_CONTENT_WITHOUT_MODELS } from "../constants";
+
+const formatComplexModels = (i: { title: string }) => {
+  return i.title;
+};
+
+const filerByTitle = (find: string) => (i: { title: string }) => {
+  return find === i.title;
+};
+
+const formatDate = (d: string) => {
+  return Day(new Date(d)).format("YYYY-MM-DD");
+};
+
+const formatSeedInputs = (val: any) => {
+  const date = val.date ? formatDate(val.date) : val.date;
+  return val.text_short || val.text_large || date;
+};
 
 const initial = {
   loading: false,
@@ -54,13 +73,18 @@ const initial = {
   rules: [(x: string) => (x !== "" && x !== null) || "Invalid"]
 };
 
-const formatComplexModels = (i: { title: string }) => i.title;
-const filerByTitle = (find: string) => (i: { title: string }) =>
-  find === i.title;
-
 export default Vue.extend({
+  props: ["seed"],
+
   data() {
-    return { ...initial };
+    const next = { ...initial };
+
+    if (this.seed) {
+      next.fullModel = this.seed.model;
+      next.inputs = this.seed.values.map(formatSeedInputs);
+    }
+
+    return next;
   },
 
   computed: {
@@ -81,12 +105,22 @@ export default Vue.extend({
   },
 
   mounted() {
-    this.fetchModals();
+    if (!this.seed) {
+      this.fetchModals();
+    }
   },
 
   methods: {
     async fetchModals() {
-      this.models = await this.$request({ url: "/api/models" });
+      const models = await this.$request({ url: "/api/models" });
+
+      if (models.length < 1) {
+        this.$alert(CANT_CREATE_CONTENT_WITHOUT_MODELS);
+        this.$emit("closed");
+      }
+
+      this.models = models;
+      this.inputs = [];
     },
 
     submitForm() {
@@ -100,23 +134,29 @@ export default Vue.extend({
         return;
       }
 
-      // todo ?
       const modelId = (this.fullModel as any).id;
       const fields = (this.fullModel as any).fields;
+
       const values = this.inputs.map((value, i) => ({
         type: fields[i].type,
         value
       }));
 
-      const method = "POST";
-      const body = { model_id: modelId, values };
+      const method = this.seed ? "PATCH" : "POST";
       const url = "/api/content";
+
+      const body = {
+        model_id: modelId,
+        values,
+        content_id: this.seed ? this.seed.id : null
+      };
 
       this.loading = true;
       const data = await this.$request({ method, body, url });
-      this.$emit("complete");
       this.loading = false;
+
       Object.assign(this.$data, { ...initial });
+      this.$emit("complete");
     }
   }
 });

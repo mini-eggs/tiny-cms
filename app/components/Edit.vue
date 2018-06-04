@@ -1,30 +1,34 @@
 <template>
   <v-bottom-sheet v-model="display">
     <v-list>
-      <ContentForm @complete="display = false" />
+      <component :is="form" @complete="handleComplete" :seed="item" />
     </v-list>
   </v-bottom-sheet>
 </template>
 
 <script lang="ts">
 import Vue from "vue";
-import ContentForm from "./ContentForm.vue";
 
 export default Vue.extend({
-  props: ["item"],
-
-  components: { ContentForm },
+  props: ["item", "form"],
 
   data: () => ({ display: false }),
 
   watch: {
     display(val) {
-      if (!val) setTimeout(() => this.$emit("complete"), 500);
+      if (!val) setTimeout(() => this.$emit("closed"), 500);
     }
   },
 
   mounted() {
     this.display = true;
+  },
+
+  methods: {
+    handleComplete() {
+      this.display = false;
+      setTimeout(() => this.$emit("complete"), 500);
+    }
   }
 });
 </script>

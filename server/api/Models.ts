@@ -31,12 +31,15 @@ router.get("/api/models", async ctx => {
 
 router.post("/api/models", async ctx => {
   try {
-    const title = ctx.request.body.title;
-    const inputs = ctx.request.body.inputs;
-    const pfield = inputs.map((data: { title: string; type: string }) => DB.Fields.create(data));
+    const { title, inputs } = ctx.request.body
+
+    const fields = await Promise.all(inputs.map((data: { title: string; type: string }) => {
+      return DB.Fields.create(data)
+    }))
+
     const model = await DB.Models.create({ title });
-    const fields = await Promise.all(pfield);
-    const passoc = fields.map(field => (model as any).addField(field));
+    await Promise.all(fields.map(field => (model as any).addField(field)))
+
     ctx.body = JSON.stringify({ msg: "Complete" });
   } catch (e) {
     ctx.status = 500;
@@ -48,7 +51,25 @@ router.post("/api/models", async ctx => {
  * UPDATE
  */
 router.patch("/api/models", async ctx => {
-  ctx.body = "TODO1";
+  try {
+    const { id, title, inputs } = ctx.request.body
+
+    await DB.Fields.destroy({ where: { model_id: id } })
+
+    const fields = await Promise.all(inputs.map((data: { title: string; type: string }) => {
+      return DB.Fields.create(data)
+    }))
+
+    const model = await DB.Models.findOne({ where: { id } });
+    await DB.Models.update({ title }, { where: { id } })
+    await Promise.all(fields.map(field => (model as any).addField(field)))
+
+    ctx.body = JSON.stringify({ msg: "Complete" });
+  }
+  catch (e) {
+    ctx.status = 500;
+    ctx.body = JSON.stringify({ msg: e.toString() });
+  }
 });
 
 /**

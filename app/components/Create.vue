@@ -1,30 +1,34 @@
 <template>
   <v-bottom-sheet v-model="display">
     <v-list>
-      <ModalForm @complete="display = false" />
+      <component :is="form" @complete="handleComplete" />
     </v-list>
   </v-bottom-sheet>
 </template>
 
 <script lang="ts">
 import Vue from "vue";
-import ModalForm from "./ModalForm.vue";
 
 export default Vue.extend({
-  props: ["item"],
-
-  components: { ModalForm },
+  props: ["item", "form"],
 
   data: () => ({ display: false }),
 
   watch: {
     display(val) {
-      if (!val) setTimeout(() => this.$emit("complete"), 500);
+      if (!val) setTimeout(() => this.$emit("closed"), 500);
     }
   },
 
   mounted() {
     this.display = true;
+  },
+
+  methods: {
+    handleComplete() {
+      this.display = false;
+      setTimeout(() => this.$emit("complete"), 500);
+    }
   }
 });
 </script>
