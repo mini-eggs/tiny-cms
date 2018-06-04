@@ -7,8 +7,10 @@
       <List v-else-if="data.length > 0" :data="data" @edit="item => editItem = item" @remove="item => removeItem(item)" />
       <EmptyMessage v-else :msg="empty" />
     </ListContainer>
-    <Edit v-if="editItem" :form="form" :item="editItem" @complete="handleEdit" @closed="editItem = null" />
-    <Create v-if="createNew" :form="form" @complete="handleCreated" @closed="createNew = false" />
+    <!-- edit -->
+    <ActionSheetForm v-if="editItem" :form="form" :item="editItem" @complete="handleEdit" @closed="editItem = null" />
+    <!-- create -->
+    <ActionSheetForm v-if="createNew" :form="form" @complete="handleCreated" @closed="createNew = false" />
     <Fab @click="createNew = true" />
   </center>
 </template>
@@ -17,8 +19,7 @@
 import Vue from "vue";
 import List from "../components/List.vue";
 import ListContainer from "../components/ListContainer.vue";
-import Edit from "../components/Edit.vue";
-import Create from "../components/Create.vue";
+import ActionSheetForm from "../components/ActionSheetForm.vue";
 import FormModel from "../components/FormModel.vue";
 import Fab from "../components/Fab.vue";
 import EmptyMessage from "../components/EmptyMessage.vue";
@@ -42,8 +43,7 @@ export default Vue.extend({
   components: {
     List,
     ListContainer,
-    Edit,
-    Create,
+    ActionSheetForm,
     Fab,
     EmptyMessage
   },
