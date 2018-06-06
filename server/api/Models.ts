@@ -31,14 +31,16 @@ router.get("/api/models", async ctx => {
 
 router.post("/api/models", async ctx => {
   try {
-    const { title, inputs } = ctx.request.body
+    const { title, inputs } = ctx.request.body;
 
-    const fields = await Promise.all(inputs.map((data: { title: string; type: string }) => {
-      return DB.Fields.create(data)
-    }))
+    const fields = [];
+
+    for (let data of inputs) {
+      fields.push(await DB.Fields.create(data));
+    }
 
     const model = await DB.Models.create({ title });
-    await Promise.all(fields.map(field => (model as any).addField(field)))
+    await Promise.all(fields.map(field => (model as any).addField(field)));
 
     ctx.body = JSON.stringify({ msg: "Complete" });
   } catch (e) {
@@ -52,21 +54,22 @@ router.post("/api/models", async ctx => {
  */
 router.patch("/api/models", async ctx => {
   try {
-    const { id, title, inputs } = ctx.request.body
+    const { id, title, inputs } = ctx.request.body;
 
-    await DB.Fields.destroy({ where: { model_id: id } })
+    await DB.Fields.destroy({ where: { model_id: id } });
 
-    const fields = await Promise.all(inputs.map((data: { title: string; type: string }) => {
-      return DB.Fields.create(data)
-    }))
+    const fields = await Promise.all(
+      inputs.map((data: { title: string; type: string }) => {
+        return DB.Fields.create(data);
+      })
+    );
 
     const model = await DB.Models.findOne({ where: { id } });
-    await DB.Models.update({ title }, { where: { id } })
-    await Promise.all(fields.map(field => (model as any).addField(field)))
+    await DB.Models.update({ title }, { where: { id } });
+    await Promise.all(fields.map(field => (model as any).addField(field)));
 
     ctx.body = JSON.stringify({ msg: "Complete" });
-  }
-  catch (e) {
+  } catch (e) {
     ctx.status = 500;
     ctx.body = JSON.stringify({ msg: e.toString() });
   }

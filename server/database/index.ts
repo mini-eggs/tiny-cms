@@ -64,13 +64,27 @@ export const Values = db.define(
   }
 );
 
+export const Connection = db.define(
+  "connection",
+  {},
+  {
+    underscored: true,
+    createdAt: "createdAt",
+    updatedAt: "updatedAt"
+  }
+);
+
 Models.hasMany(Fields, { as: "fields" });
 Models.hasMany(Content, { as: "content" });
 Content.hasMany(Values, { as: "values" });
+Values.hasMany(Connection, { as: "connection" });
+Content.hasMany(Connection, { as: "connection" });
 
 Content.belongsTo(Models, { as: "model" });
+Connection.belongsTo(Content, { as: "content" });
 
 Models.sync(opts);
 Fields.sync(opts);
 Content.sync(opts);
 Values.sync(opts);
+Connection.sync(opts);

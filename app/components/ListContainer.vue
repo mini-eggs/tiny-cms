@@ -1,18 +1,33 @@
 <template>
-  <div class="ListContainer">
+  <div class="ListContainer" :class="{ 'with-background': background, 'with-min-height': minHeight }">
     <main>
       <slot />
     </main>
   </div>
 </template>
 
+<script lang="ts">
+import Vue from 'vue'
+
+export default Vue.extend({
+  props: {
+    minHeight: {default:true},
+    background: {default:true}
+  }
+})
+</script>
+
+
 <style scoped>
 .ListContainer {
-  min-height: calc(100vh - 48px);
   position: relative;
 }
 
-.ListContainer:before {
+.ListContainer.with-min-height {
+  min-height: calc(100vh - 48px);
+}
+
+.ListContainer.with-background:before {
   content: " ";
   position: absolute;
   top: 0;

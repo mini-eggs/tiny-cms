@@ -54,7 +54,7 @@ const initial = {
   title: "",
   rules: [(x: string) => x !== "" || "Invalid"],
   inputs: [inputSeed(), inputSeed(), inputSeed(), inputSeed()],
-  fieldTypes: ["Text Short", "Text Large", "Date" /* , "Content(s)" todo */],
+  fieldTypes: ["Text Short", "Text Large", "Date", "Content(s)"],
   name,
   loading: false
 };

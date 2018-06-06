@@ -8,14 +8,26 @@
           </v-flex>
         </v-layout>
         <v-layout row wrap v-if="fullModel">
+
           <v-flex xs12 v-for="(input, index) in fullModel.fields" :key="index">
+
             <v-text-field v-if="input.type === 'Text Short'" v-model="inputs[index]" :rules="rules" :label="input.title" required />
+
             <v-text-field v-if="input.type === 'Text Large'" v-model="inputs[index]" :rules="rules" :label="input.title" required :auto-grow="true" :multi-line="true" />
+
             <template v-if="input.type === 'Date'">
               <v-subheader style="padding: 0;">{{input.title}}*</v-subheader>
               <v-date-picker v-if="input.type === 'Date'" :landscape="true" :rules="rules" v-model="inputs[index]" />
             </template>
+
+            <template v-if="input.type === 'Content(s)'">
+              <v-subheader style="padding: 0;">{{input.title}}*</v-subheader>
+              <span v-for="(x, i) in inputs[index]" :key="i">{{x.title}}{{i === inputs[index].length - 1 ? '' : ', '}}</span>
+              <ContentPicker v-model="inputs[index]" />
+            </template>
+
           </v-flex>
+
         </v-layout>
       </v-form>
       <div>
@@ -44,6 +56,8 @@ main {
 <script lang="ts">
 import Vue from "vue";
 import Day from "dayjs";
+import ContentPicker from "./ContentPicker.vue";
+import { Content } from "../junk";
 import { CANT_CREATE_CONTENT_WITHOUT_MODELS } from "../constants";
 
 const formatComplexModels = (i: { title: string }) => {
@@ -58,9 +72,14 @@ const formatDate = (d: string) => {
   return Day(new Date(d)).format("YYYY-MM-DD");
 };
 
+const formatConnections = ({ content }: { content: any }) => {
+  return Content.format(content);
+};
+
 const formatSeedInputs = (val: any) => {
   const date = val.date ? formatDate(val.date) : val.date;
-  return val.text_short || val.text_large || date;
+  const content = val.connection.map(formatConnections);
+  return val.text_short || val.text_large || date || content;
 };
 
 const initial = {
@@ -75,6 +94,8 @@ const initial = {
 
 export default Vue.extend({
   props: ["seed"],
+
+  components: { ContentPicker },
 
   data() {
     const next = { ...initial };
@@ -139,7 +160,7 @@ export default Vue.extend({
 
       const values = this.inputs.map((value, i) => ({
         type: fields[i].type,
-        value
+        value: !Array.isArray(value) ? value : value.map(({ id }) => id)
       }));
 
       const method = this.seed ? "PATCH" : "POST";

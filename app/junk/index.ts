@@ -1,8 +1,8 @@
 export class Content {
   public static format(item: any) {
     const next = { ...item };
-    const first = item.values[0]
-    const title = first.text_short || first.text_large || first.date
+    const first = item.values[0];
+    const title = item.model.title + " - " + first.text_short || first.text_large || first.date;
     return { ...next, title };
   }
 }
